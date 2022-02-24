@@ -1,4 +1,4 @@
 .xmake
 build
 lib
-config.h
+#/include/co/config.h

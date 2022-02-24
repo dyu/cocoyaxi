@@ -1,0 +1,109 @@
+# ==================================================
+# vars
+
+config("cocoyaxi_config") {
+  include_dirs = [ "include" ]
+  #defines = [
+  #  "HAS_CXXABI_H=1",
+  #]
+  if (is_win) {
+    libs = [
+      "gdi32.lib",
+    ]
+  }
+}
+
+config("cocoyaxi_local_config") {
+  defines = [
+    "HAS_OPENSSL=1",
+  ]
+  if (is_win) {
+    cflags = [
+      "/Wall",
+    ]
+    defines += [
+      "WIN32_LEAN_AND_MEAN",
+      "_WINSOCK_DEPRECATED_NO_WARNINGS",
+      "WIN32_LEAN_AND_MEAN",
+    ]
+  } else {
+    cflags = [
+      "-Wall",
+      "-Wno-strict-aliasing",
+    ]
+  }
+}
+
+static_library("cocoyaxi") {
+  sources = [
+    "src/alloc.cc",
+    "src/cout.cc",
+    "src/fast.cc",
+    "src/fastring.cc",
+    "src/flag.cc",
+    "src/json.cc",
+    "src/path.cc",
+    "src/str.cc",
+    "src/tasked.cc",
+    "src/thread.cc",
+    "src/unitest.cc",
+    "src/co/co.cc",
+    "src/co/hook.h",
+    "src/co/io_event.cc",
+    "src/co/scheduler.cc",
+    "src/co/scheduler.h",
+    "src/co/sock_ctx.h",
+    "src/hash/base64.cc",
+    "src/hash/crc16.cc",
+    "src/hash/md5.cc",
+    "src/hash/murmur_hash.cc",
+    "src/hash/url.cc",
+    "src/log/log.cc",
+    "src/log/stack_trace.cc",
+    "src/so/http.cc",
+    "src/so/rpc.cc",
+    "src/so/ssl.cc",
+    "src/so/tcp.cc",
+  ]
+  if (is_win) {
+    sources += [
+      "src/fs_win.cc",
+      "src/os_win.cc",
+      "src/time_win.cc",
+      "src/co/hook_win.cc",
+      "src/co/ssock_win.cc",
+      "src/log/stack_trace_win.cc",
+      "src/log/StackWalker.cpp",
+      "src/detours/creatwth.cpp",
+      "src/detours/detours.cpp",
+      "src/detours/disasm.cpp",
+      "src/detours/image.cpp",
+      "src/detours/modules.cpp",
+      
+      "src/co/context/context_x64.asm",
+      
+      "src/co/epoll/iocp.cc",
+    ]
+  } else {
+    sources += [
+      "src/fs.cc",
+      "src/os.cc",
+      "src/time.cc",
+      "src/co/hook.cc",
+      "src/co/sock.cc",
+      
+      "src/co/context/context.S",
+    ]
+    if (is_mac) {
+      sources += [ "src/co/epoll/kqueue.cc" ]
+    } else {
+      sources += [ "src/co/epoll/epoll.cc" ]
+    }
+  }
+  configs += [ ":cocoyaxi_local_config" ]
+  public_configs = [
+    ":cocoyaxi_config",
+    "../openssl:openssl_config",
+  ]
+  deps = [ "../openssl:openssl" ]
+}
